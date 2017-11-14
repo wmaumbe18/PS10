@@ -1,5 +1,3 @@
-# DO NOT FORK YET
-
 # Problem Set 10
 
 See [description](https://rudeboybert.github.io/STAT495/#problem_set_10) on course webpage.
