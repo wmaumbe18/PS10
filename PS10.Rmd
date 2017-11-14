@@ -73,4 +73,4 @@ in these cells:
 Method                | Training Score  | Kaggle Score
 --------------------- | -------------   | -------------
 lm                    |                 |  
-LASSO Crossvalidated  |                 |  
+LASSO crossvalidated  |                 |  
