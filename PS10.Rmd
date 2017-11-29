@@ -31,6 +31,7 @@ library(tidyverse)
 library(broom)
 library(glmnet)
 library(readr)
+library(MLmetrics)
  
 train <- read_csv("~/Advanced Data Analysis/Week 1/PS10/data/train.csv")
 test <- read_csv("~/Advanced Data Analysis/Week 1/PS10/data/test.csv")
@@ -66,11 +67,12 @@ lambda_inputs <- 10^seq(-2, 10, length = 100)
 # Fit the model using glmnet
 
 LASSO_CV <- cv.glmnet(x=predictor_matrix_train, y=train$log_price_doc, alpha=1, lambda=lambda_inputs)
-i <- which(LASSO_CV$lambda == LASSO_CV$lambda.min)
-mse1 <- LASSO_CV$cvm[i]
- 
- 
 lambda_star_1SE <- LASSO_CV$lambda.1se
+y_hat<-predict(LASSO_CV, newx=predictor_matrix_train, s=lambda_star_1SE) %>%
+  as_tibble()
+y_hat<-exp(y_hat)
+mse1<-RMSLE(y_hat, train$price_doc)
+
  
 #LASSO_PREDICTIVE MODEL
 LASSO_fit <- glmnet(x=predictor_matrix_train, y=train$log_price_doc, alpha = 1, lambda = lambda_inputs)
@@ -85,12 +87,15 @@ write_csv(sample_submission, "submission1.csv")
 
 #lm
 LM_CV<-lm(model_formula, cv=TRUE, data=train)
-sm<-summary(LM_CV)
-mse2<-mean(sm$residuals^2)
+y_hat <- predict(LM_CV, newdata=test) %>%
+  as_tibble()
+y_hat<-exp(y_hat)
+mse2<-RMSLE(y_hat, train$price_doc)
+
 
 #lm_predictive model
 LM_fit<-lm(model_formula, data = train)
-y_hat <- predict(LM_fit, new=test) %>%
+y_hat <- predict(LM_fit, newdata=test) %>%
   as_tibble()
 y_hat<-exp(y_hat)
 id<-as.data.frame(test$id) 

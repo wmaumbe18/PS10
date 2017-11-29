@@ -237,11 +237,12 @@ lambda_inputs &lt;- 10^seq(-2, 10, length = 100)
 # Fit the model using glmnet
 
 LASSO_CV &lt;- cv.glmnet(x=predictor_matrix_train, y=train$log_price_doc, alpha=1, lambda=lambda_inputs)
-i &lt;- which(LASSO_CV$lambda == LASSO_CV$lambda.min)
-mse1 &lt;- LASSO_CV$cvm[i]
- 
- 
 lambda_star_1SE &lt;- LASSO_CV$lambda.1se
+y_hat&lt;-predict(LASSO_CV, newx=predictor_matrix_train, s=lambda_star_1SE) %&gt;%
+  as_tibble()
+y_hat&lt;-exp(y_hat)
+mse1&lt;-RMSLE(y_hat, train$price_doc)
+
  
 #LASSO_PREDICTIVE MODEL
 LASSO_fit &lt;- glmnet(x=predictor_matrix_train, y=train$log_price_doc, alpha = 1, lambda = lambda_inputs)
@@ -256,12 +257,15 @@ write_csv(sample_submission, &quot;submission1.csv&quot;)
 
 #lm
 LM_CV&lt;-lm(model_formula, cv=TRUE, data=train)
-sm&lt;-summary(LM_CV)
-mse2&lt;-mean(sm$residuals^2)
+y_hat &lt;- predict(LM_CV, newdata=test) %&gt;%
+  as_tibble()
+y_hat&lt;-exp(y_hat)
+mse2&lt;-RMSLE(y_hat, train$price_doc)
+
 
 #lm_predictive model
 LM_fit&lt;-lm(model_formula, data = train)
-y_hat &lt;- predict(LM_fit, new=test) %&gt;%
+y_hat &lt;- predict(LM_fit, newdata=test) %&gt;%
   as_tibble()
 y_hat&lt;-exp(y_hat)
 id&lt;-as.data.frame(test$id) 
@@ -284,12 +288,12 @@ write_csv(sample_submission, &quot;submission2.csv&quot;)</code></pre>
 <tbody>
 <tr class="odd">
 <td>lm</td>
-<td>0.0642473</td>
+<td>2.6190249</td>
 <td>2.63413</td>
 </tr>
 <tr class="even">
 <td>LASSO crossvalidated</td>
-<td>0.2963701</td>
+<td>0.5416205</td>
 <td>0.42577</td>
 </tr>
 </tbody>
